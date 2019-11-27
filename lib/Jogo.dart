@@ -20,11 +20,18 @@ class _JogoState extends State<Jogo> {
   var _vitoria = 0;
   var _derrota = 0;
   var _empates = 0;
-  var _sequencia = 0;
+  var _sequenciaVitoria = 0;
+  var _sequenciaEmpate = 0;
+  var _sequenciaDerrota = 0;
   var _jogos = 0;
   var _pedra = 0;
   var _paper = 0;
   var _tesoura = 0;
+  var _tesouraSeq = 0;
+  var _pedraSeq = 0;
+  var _papelSeq = 0;
+  List _diferentes = [false, false, false];
+
 
   //Seleção - ainda dá pra arrumar
   var _imagemSelecao = AssetImage("images/ultimo.png");
@@ -34,6 +41,7 @@ class _JogoState extends State<Jogo> {
   var _sel3 =  AssetImage("images/vetor.png");
 
   List _corConquista = [
+    Colors.white, //[0]
     Colors.white,
     Colors.white,
     Colors.white,
@@ -43,8 +51,40 @@ class _JogoState extends State<Jogo> {
     Colors.white,
     Colors.white,
     Colors.white,
+    Colors.white, //[10]
+    Colors.white,
+    Colors.white,
+    Colors.white,
+    Colors.white,
+    Colors.white,
+    Colors.white,
+    Colors.white,
+    Colors.white, //[18]
   ];
 
+
+  // BOTÃO DE RESET
+  void _reset(){
+    setState(() {
+      _vitoria = 0; _empates = 0; _derrota = 0; _sequenciaDerrota = 0;
+      _sequenciaEmpate = 0; _sequenciaVitoria = 0; _jogos = 0; _pedra = 0; _paper = 0;
+      _tesoura = 0; _pedraSeq = 0; _papelSeq = 0; _tesouraSeq = 0; _diferentes = [false, false, false];
+      placarApp = 0; placarUsuario = 0; _sel1 =  _imagemVazio; _sel2 =  _imagemVazio; _sel3 =  _imagemVazio;
+      _mensagem = 'Escolha uma opção abaixo'; _imagemApp = AssetImage("images/padrao.png");
+      _corConquista = [
+        Colors.white, Colors.white, Colors.white,
+        Colors.white, Colors.white, Colors.white,
+        Colors.white, Colors.white, Colors.white,
+        Colors.white, Colors.white, Colors.white,
+        Colors.white, Colors.white, Colors.white,
+        Colors.white, Colors.white, Colors.white,
+        Colors.white, Colors.white,
+      ];
+    });
+  }
+
+
+  // REGRAS DO NEGÓCIO
   void _opcaoSelecionada(String escolhaUsuario){
     var opcoes = ["pedra", "papel", "tesoura"];
     var numero = Random().nextInt(3);
@@ -100,11 +140,28 @@ class _JogoState extends State<Jogo> {
         });
         placarUsuario++;
         _vitoria++;
-        _sequencia++;
+        _sequenciaVitoria++;
+        _sequenciaEmpate = 0;
+        _sequenciaDerrota = 0;
         _jogos++;
-        if(escolhaUsuario == "pedra"){_pedra++;};
-        if(escolhaUsuario == "papel"){_paper++;};
-        if(escolhaUsuario == "tesoura"){_tesoura++;};
+        if(escolhaUsuario == "pedra"){
+          _pedra++; _pedraSeq++; _papelSeq = 0; _tesouraSeq = 0;
+          if (_diferentes[0] == false){ _diferentes[0] = true;}
+          else {_diferentes = [false, false, false];}
+          print(_diferentes);
+        }
+        if(escolhaUsuario == "papel"){
+          _paper++; _papelSeq++; _pedraSeq = 0; _tesouraSeq = 0;
+          if (_diferentes[1] == false){ _diferentes[1] = true;}
+          else {_diferentes = [false, false, false];}
+          print(_diferentes);
+        }
+        if(escolhaUsuario == "tesoura"){
+          _tesoura++; _tesouraSeq++; _pedraSeq = 0; _papelSeq = 0;
+          if (_diferentes[2] == false){ _diferentes[2] = true;}
+          else {_diferentes = [false, false, false];}
+          print(_diferentes);
+        }
     } else if(
         (escolhaApp == "pedra" && escolhaUsuario == "tesoura") ||
         (escolhaApp == "tesoura" && escolhaUsuario == "papel") ||
@@ -115,58 +172,118 @@ class _JogoState extends State<Jogo> {
       });
       placarApp++;
       _derrota++;
-      _sequencia = 0;
+      _sequenciaVitoria = 0;
+      _sequenciaEmpate = 0;
+      _sequenciaDerrota++;
       _jogos++;
+      _diferentes = [false, false, false];
+      print(_diferentes);
     } else {
       setState(() {
         this._mensagem = "Deu empate!";
       });
-      _sequencia = 0;
+      _sequenciaVitoria = 0;
+      _sequenciaEmpate++;
+      _sequenciaDerrota = 0;
       _jogos++;
       _empates++;
+      _diferentes = [false, false, false];
+      print(_diferentes);
     }
 
     // Validação dos Achievements //
-    if(_derrota >= 50){
+    if(_derrota >= 50){  //50 Derrotas
       this._corConquista[0] = Colors.teal;
     }
-    if(_vitoria >= 50){
+    if(_vitoria >= 50){ //50 Vitórias
       this._corConquista[1] = Colors.lime;
     }
-    if(_sequencia >= 3){
+    if(_sequenciaVitoria >= 3){  //3 Vitórias em Sequencia
       this._corConquista[2] = Colors.blue;
     }
-    if(_jogos >= 50){
+    if(_jogos >= 50){ // 50 jogos
       this._corConquista[3] = Colors.pink;
     }
-    if(_jogos >= 100){
+    if(_jogos >= 100){ // 100 Jogos
       this._corConquista[4] = Colors.deepPurple;
     }
-    if(_pedra >= 15){
+    if(_tesoura >= 15){ // 15 Vitórias usando tesoura
       this._corConquista[5] = Colors.green;
     }
-    if(_paper >= 15){
+    if(_paper >= 15){  // 15 Vitórias usando Papel
       this._corConquista[6] = Colors.red;
     }
-    if(_tesoura >= 15){
+    if(_pedra >= 15){ // 15 Vitórias usando Pedra
       this._corConquista[7] = Colors.indigo;
     }
-    if(_empates >= 50){
+    if(_empates >= 50){  // 50 Empates
       this._corConquista[8] = Colors.brown;
     }
+
+
+    // Segunda linha dos Achievements //
+    if(_vitoria > _derrota + 10) {  // 10 vitórias de vantagem
+      this._corConquista[9] = Colors.blue;
+    }
+    // ---------- Achievement 11, Cor 10 - 60 jogos em 60 segundos -------------//
+
+    if(_jogos >= 500){ // 500 jogos
+      this._corConquista[11] = Colors.blueGrey;
+    }
+    if (_diferentes[1] == true && _diferentes[2] == true && _diferentes[0] == true){ // 3 vitórias seguidas com três simbolos diferentes
+      this._corConquista[12] = Colors.greenAccent;
+    }
+    if(_sequenciaVitoria >= 5){  // 5 Vitórias Seguidas
+      this._corConquista[13] = Colors.lime;
+    }
+    if(_tesouraSeq >= 3){ // 3 Vitórias Seguidas com a tesoura
+      this._corConquista[14] = Colors.amber;
+    }
+    if(_pedraSeq >= 3){ // 3 Vitórias Seguidas com a pedra
+      this._corConquista[15] = Colors.amber;
+    }
+    if(_papelSeq >= 3){ // 3 Vitórias Seguidas com o papel
+      this._corConquista[16] = Colors.amber;
+    }
+    if(_papelSeq >= 3){ // 3 Vitórias Seguidas com o papel
+      this._corConquista[16] = Colors.amber;
+    }
+    if(_sequenciaEmpate >= 3) { //3 Empates em Sequencia
+      this._corConquista[17] = Colors.indigoAccent;
+    }
+    if(_sequenciaDerrota >= 5) { //5 Derrotas em Sequencia
+      this._corConquista[18] = Colors.yellow;
+    }
+
+
   }
 
+  //Início do Scaffold
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("JoKenPo"),
+      backgroundColor: Colors.white,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(30.0),
+        child: AppBar(
+          title: Text("JoKenPo",
+            style: TextStyle(
+                fontSize: 15,
+                color: Colors.blue,
+            ),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.white,
+          bottomOpacity: 10,
+          centerTitle: true,
+        ),
       ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.only(top: 32, bottom: 16),
+            padding: EdgeInsets.only(top: 15, bottom: 10),
             child: Text(
               "Escolha do App",
               textAlign: TextAlign.center,
@@ -214,9 +331,9 @@ class _JogoState extends State<Jogo> {
           Padding(child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  Image(image: _sel1, width: 100, height: 10),
-                  Image(image: _sel2, width: 100, height: 10),
-                  Image(image: _sel3, width: 100, height: 10)
+                  Image(image: _sel1, width: 100, height: 5, fit: BoxFit.cover),
+                  Image(image: _sel2, width: 100, height: 5, fit: BoxFit.cover),
+                  Image(image: _sel3, width: 100, height: 5, fit: BoxFit.cover)
                 ],
               ),
               padding: EdgeInsets.only(top:10, bottom: 10)
@@ -224,38 +341,63 @@ class _JogoState extends State<Jogo> {
 
 
           // Placar do Jogo
-          Padding(
-              padding: EdgeInsets.only(top: 10, bottom: 10),
-              child: Text(
-                "Placar do jogo",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold
-                ),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Column(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(top: 10, bottom: 0),
+                    child: Text(
+                      "Placar do jogo",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 5, bottom: 1),
+                    child: Text(
+                      "Você: " + placarUsuario.toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 2, bottom: 20),
+                    child: Text(
+                      "Aplicativo: " + placarApp.toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal
+                      ),
+                    ),
+                  ),
+                ],
               ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(top: 5, bottom: 3),
-            child: Text(
-              "Você: " + placarUsuario.toString(),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.normal
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(top: 2, bottom: 20),
-            child: Text(
-              "Aplicativo: " + placarApp.toString(),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.normal
-            ),
-            ),
+              Column(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(top: 2, bottom: 20),
+                    child: Text(
+                      "Jogos Realizados: " + _jogos.toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ],
           ),
 
 
@@ -362,6 +504,141 @@ class _JogoState extends State<Jogo> {
                   ),
                   child: Icon(Icons.whatshot, color: _corConquista[7])
               ),
+            ],
+          ),
+          Padding(padding: EdgeInsets.only(top: 5, bottom: 5)),
+
+          //Segunda linha de Achievements
+          Row(
+
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              GestureDetector(
+                  onTap: () => Fluttertoast.showToast(
+                    msg: "Acelerado: Abriu distância de 10 vitórias de vantagem.",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.limeAccent,
+                    textColor: Colors.black,
+                    timeInSecForIos: 1,
+                  ),
+                  child: Icon(Icons.arrow_forward, color: _corConquista[9])
+              ),
+              GestureDetector(
+                  onTap: () => Fluttertoast.showToast(
+                    msg: "60dps, Dedos Furiosos: Você concluiu 60 jogos em 60 segundos ou menos [AINDA POR FAZER].",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.limeAccent,
+                    textColor: Colors.black,
+                    timeInSecForIos: 1,
+                  ),
+                  child: Icon(Icons.fingerprint, color: _corConquista[10])
+              ),
+              GestureDetector(
+                  onTap: () => Fluttertoast.showToast(
+                    msg: "Procastinador: Você alcançou uma sequência de 500 jogos.",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.limeAccent,
+                    textColor: Colors.black,
+                    timeInSecForIos: 1,
+                  ),
+                  child: Icon(Icons.sentiment_satisfied, color: _corConquista[11])
+              ),
+              GestureDetector(
+                  onTap: () => Fluttertoast.showToast(
+                    msg: "Ousadia e Alegria: Conseguiu 3 vitórias seguidas com 3 símbolos diferentes.",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.limeAccent,
+                    textColor: Colors.black,
+                    timeInSecForIos: 1,
+                  ),
+                  child: Icon(Icons.add_location, color: _corConquista[12])
+              ),
+              GestureDetector(
+                  onTap: () => Fluttertoast.showToast(
+                    msg: "Snipper: Você conseguiu 5 vitórias seguidas!",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.limeAccent,
+                    textColor: Colors.black,
+                    timeInSecForIos: 1,
+                  ),
+                  child: Icon(Icons.terrain, color: _corConquista[13])
+              ),
+              GestureDetector(
+                  onTap: () => Fluttertoast.showToast(
+                    msg: "Nazaré Tedesco: Você conseguiu uma sequência de 3 vitórias com a tesoura!",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.limeAccent,
+                    textColor: Colors.black,
+                    timeInSecForIos: 1,
+                  ),
+                  child: Icon(Icons.content_cut, color: _corConquista[14])
+              ),
+              GestureDetector(
+                  onTap: () => Fluttertoast.showToast(
+                    msg: "Apedrejador: Você conseguiu uma sequência de 3 vitórias com a pedra!",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.limeAccent,
+                    textColor: Colors.black,
+                    timeInSecForIos: 1,
+                  ),
+                  child: Icon(Icons.whatshot, color: _corConquista[15])
+              ),
+              GestureDetector(
+                  onTap: () => Fluttertoast.showToast(
+                    msg: "Escritório: Você conseguiu uma sequência de 3 vitórias com o papel!",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.limeAccent,
+                    textColor: Colors.black,
+                    timeInSecForIos: 1,
+                  ),
+                  child: Icon(Icons.photo_library, color: _corConquista[16])
+              ),
+              GestureDetector(
+                  onTap: () => Fluttertoast.showToast(
+                    msg: "Tite: Você conseguiu 3 empates seguidos.",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.limeAccent,
+                    textColor: Colors.black,
+                    timeInSecForIos: 1,
+                  ),
+                  child: Icon(Icons.trending_flat, color: _corConquista[17])
+              ),
+              GestureDetector(
+                  onTap: () => Fluttertoast.showToast(
+                    msg: "Estágiarios no Pembas: Você teve 5 derrotas seguidas.",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.limeAccent,
+                    textColor: Colors.black,
+                    timeInSecForIos: 1,
+                  ),
+                  child: Icon(Icons.trending_flat, color: _corConquista[18])
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Padding(
+                  padding: EdgeInsets.only(top: 5, bottom: 20),
+                  child: RaisedButton(
+                    onPressed: (){_reset();},
+                    color: Colors.indigoAccent,
+                    child: Text(
+                      "Reiniciar o Jogo",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
+              )
             ],
           )
         ],
